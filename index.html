@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>日月同辉 (Love Legend) - 银河快递</title>
+<style>
+  :root {
+    --text: #ffffff;
+    --dim: #9aa0a9;
+    --faint: #6a7078;
+    --red: #ff3b30;
+    --bg: #0b0e14;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { font-size: clamp(13px, min(4vw, 4.1vh), 20px); }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #000;
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .app {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* ---------- 通用 ---------- */
+  .view { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  .icon-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .icon-btn svg { display: block; }
+
+  /* ---------- 主页面 ---------- */
+  #viewMain { z-index: 10; }
+
+  .bg {
+    position: fixed;
+    inset: 0;
+    background: url('cover.jpg') center / cover no-repeat, linear-gradient(160deg, #1b2330, #0b0e14);
+  }
+  .shade-top {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 140px;
+    background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,0));
+    pointer-events: none;
+  }
+  .shade-bottom {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 58%;
+    background: linear-gradient(0deg, rgba(6,8,12,.95) 12%, rgba(6,8,12,.6) 48%, rgba(6,8,12,0));
+    pointer-events: none;
+  }
+
+  .topbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: calc(12px + env(safe-area-inset-top)) 14px 0;
+  }
+  .top-title { font-size: 1rem; font-weight: 600; text-align: center; }
+
+  .spacer { flex: 1; min-height: 12px; }
+
+  .song-info { position: relative; padding: 0 24px 0; }
+  .info-left { flex: 1; min-width: 0; }
+  .title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: .3px;
+  }
+  .artist { margin-top: 8px; font-size: 0.9375rem; color: var(--dim); display: flex; align-items: center; gap: 3px; }
+  .artist .arrow { font-size: 1.125rem; line-height: 1; transform: translateY(-1px); }
+
+  .lyric-preview {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: 22px 24px 0;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    width: auto;
+  }
+  .lyric-line {
+    font-size: 1.0625rem;
+    font-weight: 500;
+    max-width: 100%;
+    text-align: center;
+    line-height: 1.4;
+    text-shadow: 0 1px 8px rgba(0,0,0,.4);
+    min-height: 24px;
+  }
+  .expand-hint { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--dim); }
+  .expand-hint svg { transform: rotate(180deg); }
+
+  .progress-area { position: relative; padding: 18px 24px 4px; }
+  .progress-row { display: flex; align-items: center; gap: 12px; }
+  .time { font-size: 0.75rem; color: rgba(255,255,255,.85); font-variant-numeric: tabular-nums; min-width: 38px; }
+  .time:last-child { text-align: right; }
+  .track {
+    flex: 1;
+    position: relative;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    touch-action: none;
+  }
+  .track .rail {
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    height: 2px;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,.25);
+    border-radius: 1px;
+  }
+  .track .fill {
+    position: absolute;
+    left: 0; top: 50%;
+    height: 2px;
+    transform: translateY(-50%);
+    background: #fff;
+    border-radius: 1px;
+    width: 0%;
+  }
+  .track .knob {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 4px rgba(0,0,0,.4);
+    left: 0%;
+  }
+  .quality { text-align: center; font-size: 0.6875rem; color: var(--dim); margin-top: 2px; letter-spacing: 1px; }
+
+  .controls {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding: 12px 30px 4px;
+  }
+  .controls .sm { opacity: .85; }
+  .play-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    width: 72px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+  }
+  .play-btn svg { display: block; filter: drop-shadow(0 2px 8px rgba(0,0,0,.35)); }
+
+  .bottom-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px 6px;
+  }
+  .wiki-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.25);
+    color: #fff;
+    font-size: 0.875rem;
+    letter-spacing: .3px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .home-indicator {
+    position: relative;
+    align-self: center;
+    width: 134px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255,255,255,.9);
+    margin-top: auto;
+    margin-bottom: calc(6px + env(safe-area-inset-bottom));
+  }
+
+  /* ---------- 歌词全屏 ---------- */
+  #viewLyrics { z-index: 20; display: none; background: #0d1015; }
+  #viewLyrics.open { display: flex; }
+
+  .lyr-bg {
+    position: fixed;
+    inset: -30px;
+    background: url('cover.jpg') center / cover no-repeat, linear-gradient(160deg, #1b2330, #0b0e14);
+    filter: blur(48px) saturate(1.15) brightness(.7);
+    transform: scale(1.1);
+  }
+  .lyr-shade {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(13,16,21,.82) 0%, rgba(13,16,21,.6) 40%, rgba(13,16,21,.82) 100%);
+    pointer-events: none;
+  }
+
+  .lyrics-head {
+    justify-content: space-between;
+    padding-top: calc(8px + env(safe-area-inset-top));
+  }
+  .lyrics-title { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .l-title { font-size: 1.0625rem; font-weight: 700; }
+  .l-artist { font-size: 0.8125rem; color: var(--dim); }
+  .l-tag { margin-top: 8px; font-size: 0.75rem; }
+
+  /* 歌词页展开/收起动画：整个页面抽屉式上下滑动 */
+  @keyframes viewSlideUp {
+    from { transform: translateY(100%); opacity: .5; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes viewSlideDown {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(100%); opacity: .5; }
+  }
+  #viewLyrics.open, #viewLyrics.closing { display: flex; }
+  #viewLyrics.open { animation: viewSlideUp .4s cubic-bezier(.32,.72,.28,1) backwards; }
+  #viewLyrics.closing { animation: viewSlideDown .32s cubic-bezier(.4,.05,.55,1) backwards; }
+
+  .lyrics-body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .lyrics-scroll {
+    flex: 1;
+    overflow: hidden;
+    padding: 56px 0 56px;
+    min-height: 0;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%);
+  }
+  .lyrics-scroll .line {
+    text-align: center;
+    padding: 11px 24px;
+    font-size: 1rem;
+    line-height: 1.35;
+    color: var(--faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+    transition: color .3s ease, font-weight .28s ease;
+    cursor: pointer;
+  }
+  .lyrics-scroll .line.active {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .lyrics-bottom {
+    position: relative;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+  .copyright {
+    text-align: center;
+    font-size: 0.6562rem;
+    color: var(--faint);
+    line-height: 1.6;
+    padding: 12px 30px 8px;
+  }
+
+  /* ---------- 歌曲百科 ---------- */
+  #viewWiki { z-index: 20; display: none; background: #0d1015; }
+  #viewWiki.open, #viewWiki.closing { display: flex; }
+
+  .wiki-bg {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, #12161d 0%, #0b0e14 40%, #0b0e14 100%);
+  }
+  .wiki-head {
+    justify-content: space-between;
+    padding-top: calc(8px + env(safe-area-inset-top));
+  }
+  .wiki-title { font-size: 1.0625rem; font-weight: 700; }
+
+  .wiki-scroll {
+    position: relative;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 20px calc(28px + env(safe-area-inset-bottom));
+  }
+  #viewWiki.open { animation: viewSlideUp .36s cubic-bezier(.32,.72,.28,1) backwards; }
+  #viewWiki.closing { animation: viewSlideDown .3s cubic-bezier(.4,.05,.55,1) backwards; }
+
+  .wiki-card {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 16px;
+    padding: 18px 18px;
+    margin-bottom: 14px;
+  }
+  .wiki-card h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .wiki-card h2::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    border-radius: 2px;
+    background: #fff;
+  }
+  .detail-table { width: 100%; border-collapse: collapse; }
+  .detail-table tr td {
+    padding: 7px 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    vertical-align: top;
+  }
+  .detail-table td.k { width: 96px; color: var(--dim); white-space: nowrap; }
+  .detail-table td.v { color: rgba(255,255,255,.94); }
+
+  .wiki-para { font-size: 0.9062rem; line-height: 1.85; color: rgba(255,255,255,.9); }
+
+  .artist-photo {
+    width: 100%;
+    border-radius: 12px;
+    display: block;
+    margin-bottom: 14px;
+  }
+  .artist-name { font-size: 1.1875rem; font-weight: 700; margin-bottom: 8px; }
+  .artist-bio { font-size: 0.875rem; line-height: 1.8; color: rgba(255,255,255,.85); }
+  .artist-bio .muted { color: var(--dim); }
+
+  /* ---------- 分享面板 ---------- */
+  .sheet-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 80;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .sheet-mask.show { display: flex; }
+  .sheet {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    background: #171b22;
+    border-radius: 18px 18px 0 0;
+    padding: 10px 16px calc(18px + env(safe-area-inset-bottom));
+    animation: sheetUp .28s cubic-bezier(.32,.72,.28,1) both;
+  }
+  @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .sheet-title { text-align: center; font-size: 0.8125rem; color: var(--dim); padding: 10px 0 6px; }
+  .sheet-item {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    padding: 15px 0;
+    cursor: pointer;
+    border-top: 1px solid rgba(255,255,255,.06);
+    text-align: center;
+  }
+  .sheet-item.cancel { color: var(--dim); }
+
+  /* ---------- 提示 ---------- */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24%;
+    transform: translate(-50%, 20px);
+    background: rgba(20,24,30,.94);
+    color: #fff;
+    font-size: 0.8125rem;
+    padding: 10px 16px;
+    border-radius: 12px;
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease, transform .3s ease;
+    text-align: center;
+    max-width: 86%;
+    line-height: 1.5;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <audio id="audio" src="music.mp3" preload="auto" playsinline></audio>
+
+  <!-- ================= 主页面 ================= -->
+  <div class="view" id="viewMain">
+    <div class="bg"></div>
+    <div class="shade-top"></div>
+    <div class="shade-bottom"></div>
+
+    <header class="topbar">
+      <button class="icon-btn share-btn" aria-label="分享">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M4.5 13v5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/></svg>
+      </button>
+    </header>
+
+    <div class="spacer"></div>
+
+    <section class="song-info">
+      <div class="info-left">
+        <h1 class="title">日月同辉 (Love Legend)</h1>
+        <div class="artist">银河快递 <span class="arrow">›</span></div>
+      </div>
+    </section>
+
+    <button class="lyric-preview" id="lyricPreview" aria-label="打开歌词">
+      <span class="lyric-line" id="previewLine"></span>
+      <span class="expand-hint">
+        展开歌词
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </span>
+    </button>
+
+    <section class="progress-area">
+      <div class="progress-row">
+        <span class="time" id="curTime">00:00</span>
+        <div class="track" id="track">
+          <span class="rail"></span>
+          <span class="fill" id="fill"></span>
+          <span class="knob" id="knob"></span>
+        </div>
+        <span class="time" id="totalTime">03:21</span>
+      </div>
+      <div class="quality">高清臻音</div>
+    </section>
+
+    <section class="controls">
+      <button class="icon-btn" aria-label="上一首">
+        <svg viewBox="0 0 24 24" width="24" height="24"><path d="M6.5 5.5v13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M20 5.5l-9.5 6.5 9.5 6.5z" fill="currentColor"/></svg>
+      </button>
+      <button class="play-btn" id="playBtn" aria-label="播放/暂停"></button>
+      <button class="icon-btn" aria-label="下一首">
+        <svg viewBox="0 0 24 24" width="24" height="24"><path d="M17.5 5.5v13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M4 5.5l9.5 6.5-9.5 6.5z" fill="currentColor"/></svg>
+      </button>
+    </section>
+
+    <section class="bottom-bar">
+      <button class="wiki-btn open-wiki" aria-label="歌曲百科">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5"/><path d="M12 7.6v.1"/></svg>
+        歌曲百科
+      </button>
+    </section>
+
+    <div class="home-indicator"></div>
+  </div>
+
+  <!-- ================= 歌词全屏 ================= -->
+  <div class="view" id="viewLyrics">
+    <div class="lyr-bg"></div>
+    <div class="lyr-shade"></div>
+
+    <header class="topbar lyrics-head">
+      <button class="icon-btn" id="closeLyrics" aria-label="收起歌词">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="top-title lyrics-title">
+        <div class="l-title">日月同辉 (Love Legend)</div>
+        <div class="l-artist">银河快递 ›</div>
+        <div class="l-tag">
+          <button class="wiki-btn open-wiki" aria-label="歌曲百科">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5"/><path d="M12 7.6v.1"/></svg>
+            歌曲百科
+          </button>
+        </div>
+      </div>
+      <button class="icon-btn share-btn" aria-label="分享">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M4.5 13v5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/></svg>
+      </button>
+    </header>
+
+    <div class="lyrics-body">
+      <div class="lyrics-scroll" id="lyricsScroll"></div>
+    </div>
+
+    <div class="lyrics-bottom">
+      <div class="copyright">
+        <div>OP：响当当(南京)文化有限公司</div>
+        <div>出品：响当当(南京)文化有限公司 · 未经著作权人许可 不得翻唱翻录或使用</div>
+      </div>
+      <section class="progress-area">
+        <div class="progress-row">
+          <span class="time" id="curTime2">00:00</span>
+          <div class="track" id="track2">
+            <span class="rail"></span>
+            <span class="fill" id="fill2"></span>
+            <span class="knob" id="knob2"></span>
+          </div>
+          <span class="time" id="totalTime2">03:21</span>
+        </div>
+        <div class="quality">高清臻音</div>
+      </section>
+      <section class="controls">
+        <button class="icon-btn" aria-label="上一首">
+          <svg viewBox="0 0 24 24" width="24" height="24"><path d="M6.5 5.5v13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M20 5.5l-9.5 6.5 9.5 6.5z" fill="currentColor"/></svg>
+        </button>
+        <button class="play-btn" id="playBtn2" aria-label="播放/暂停"></button>
+        <button class="icon-btn" aria-label="下一首">
+          <svg viewBox="0 0 24 24" width="24" height="24"><path d="M17.5 5.5v13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M4 5.5l9.5 6.5-9.5 6.5z" fill="currentColor"/></svg>
+        </button>
+      </section>
+    </div>
+
+    <div class="home-indicator"></div>
+  </div>
+
+  <!-- ================= 歌曲百科 ================= -->
+  <div class="view" id="viewWiki">
+    <div class="wiki-bg"></div>
+
+    <header class="topbar wiki-head">
+      <button class="icon-btn" id="closeWiki" aria-label="返回">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="top-title wiki-title">歌曲百科 · 日月同辉</div>
+      <button class="icon-btn share-btn" aria-label="分享">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M4.5 13v5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/></svg>
+      </button>
+    </header>
+
+    <div class="wiki-scroll">
+      <section class="wiki-card">
+        <h2>歌曲详情</h2>
+        <table class="detail-table">
+          <tr><td class="k">曲风</td><td class="v">流行</td></tr>
+          <tr><td class="k">专辑</td><td class="v">银河彩蛋 (Galaxy Jackpot)</td></tr>
+          <tr><td class="k">语种</td><td class="v">国语</td></tr>
+          <tr><td class="k">发行时间</td><td class="v">2025-02-15（录音室版）</td></tr>
+          <tr><td class="k">时长</td><td class="v">03:21</td></tr>
+          <tr><td class="k">BPM</td><td class="v">100</td></tr>
+          <tr><td class="k">作词</td><td class="v">管健嘉晨</td></tr>
+          <tr><td class="k">作曲</td><td class="v">管健嘉晨</td></tr>
+          <tr><td class="k">编曲</td><td class="v">陈亮均</td></tr>
+          <tr><td class="k">制作人</td><td class="v">陈亮均</td></tr>
+          <tr><td class="k">主唱</td><td class="v">管健嘉晨 / 沈慧雯</td></tr>
+          <tr><td class="k">吉他</td><td class="v">沈慧雯</td></tr>
+          <tr><td class="k">键盘</td><td class="v">陈亮均</td></tr>
+          <tr><td class="k">贝斯</td><td class="v">胡海晓</td></tr>
+          <tr><td class="k">鼓</td><td class="v">逯通</td></tr>
+          <tr><td class="k">录音</td><td class="v">小明</td></tr>
+          <tr><td class="k">混音</td><td class="v">小明</td></tr>
+          <tr><td class="k">母带</td><td class="v">小明</td></tr>
+          <tr><td class="k">出品</td><td class="v">响当当(南京)文化有限公司</td></tr>
+        </table>
+      </section>
+
+      <section class="wiki-card">
+        <h2>歌曲解读</h2>
+        <p class="wiki-para">《日月同辉 (Love Legend)》是银河快递乐队收录于 2025 年专辑《银河彩蛋》(Galaxy Jackpot) 的一首轻快流行情歌。「日月同辉」本是一种罕见天象，歌词借此比喻恋人之间跨越昼夜、永恒相伴的浪漫——「当所有人抬头看星星的时候，而我在看你」。副歌里「我和你昼夜更替」把日与月、昼与夜的交替写成爱情里不变的注视，我眼里只有你。歌曲以原声吉他铺底，BPM 100 的轻快节奏配合管健嘉晨与沈慧雯的男女声对唱，整体氛围温暖明亮，像一封从宇宙寄来的情书。</p>
+      </section>
+
+      <section class="wiki-card">
+        <h2>关于艺人</h2>
+        <img class="artist-photo" src="artist.jpg" alt="银河快递">
+        <div class="artist-name">银河快递 (Galaxy Express)</div>
+        <div class="artist-bio">
+          将词曲比作信件，我们都可以是寄件人，由银河快递（Galaxy Express）的队员们用心派送到每一位「专属」收件人身边！欢迎寄件哦～<br><br>
+          <span class="muted">派送员（主唱）：</span>管健嘉晨<br>
+          <span class="muted">派送员（主唱/吉他手）：</span>沈慧雯<br>
+          <span class="muted">派送员（贝斯）：</span>胡海晓<br>
+          <span class="muted">派送员（打击）：</span>逯通<br>
+          <span class="muted">派送员（键盘）：</span>陈亮均<br>
+          <span class="muted">分拣员（制作人）：</span>翁大涵
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- 分享面板 -->
+  <div class="sheet-mask" id="sheetMask">
+    <div class="sheet">
+      <div class="sheet-title">分享</div>
+      <button class="sheet-item" id="shareSystem">系统分享</button>
+      <button class="sheet-item" id="shareCopy">复制链接</button>
+      <button class="sheet-item" id="shareDownload">下载歌曲</button>
+      <button class="sheet-item cancel" id="sheetCancel">取消</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var audio = document.getElementById('audio');
+  var playBtn = document.getElementById('playBtn');
+  var playBtn2 = document.getElementById('playBtn2');
+  var previewLine = document.getElementById('previewLine');
+  var lyricsScroll = document.getElementById('lyricsScroll');
+  var viewLyrics = document.getElementById('viewLyrics');
+  var viewWiki = document.getElementById('viewWiki');
+  var sheetMask = document.getElementById('sheetMask');
+  var toast = document.getElementById('toast');
+
+  var SVG_PLAY = '<svg viewBox="0 0 24 24" width="42" height="42"><path d="M8.8 5.4v13.2c0 .66.72 1.06 1.28.7l10.4-6.6c.5-.32.5-1.08 0-1.4L10.08 4.7c-.56-.36-1.28.04-1.28.7z" fill="currentColor"/></svg>';
+  var SVG_PAUSE = '<svg viewBox="0 0 24 24" width="42" height="42"><rect x="6.4" y="5" width="4.4" height="14" rx="1.2" fill="currentColor"/><rect x="13.2" y="5" width="4.4" height="14" rx="1.2" fill="currentColor"/></svg>';
+
+  var lyrics = [];
+  var currentIndex = -1;
+  var started = false;
+
+  var LRC_FALLBACK =
+    '[00:19.80]我的宇宙不算很大\n' +
+    '[00:23.25]而你是最亮的那颗\n' +
+    '[00:28.05]当一束光照进身体\n' +
+    '[00:32.70]你就成为我的水星\n' +
+    '[00:39.03]我曾为你翻山越岭\n' +
+    '[00:42.33]全都不在意乐此不疲\n' +
+    '[00:47.25]你悄悄地出现在隔壁让晚风拉近彼此的距离\n' +
+    '[00:51.93]然后再偷偷地告诉你\n' +
+    '[00:57.30]我爱你一生中最浪漫的事是遇见你\n' +
+    '[01:05.28]当所有人抬头看星星的时候而我在看你\n' +
+    '[01:11.61]是爱情(我和你昼夜更替)\n' +
+    '[01:16.53]我眼里只有你虽然小声的说但却听的清晰\n' +
+    '[01:24.42]什么时候我突然如此上瘾可能注定\n' +
+    '[01:30.87]就是你\n' +
+    '[01:36.69]不会犹豫不用怀疑\n' +
+    '[01:39.90]我会奋不顾身地奔向你\n' +
+    '[01:44.82]每当需要我的时候\n' +
+    '[01:49.53]我都会出现在你身边\n' +
+    '[01:55.74]千万人海一眼心动\n' +
+    '[01:59.28]感叹这奇妙的光阴\n' +
+    '[02:03.90]记得初次见你的心情现在回想起还是会动心\n' +
+    '[02:08.72]我慢慢的说你慢慢的听\n' +
+    '[02:16.50]我爱你一生中最浪漫的事是遇见你\n' +
+    '[02:24.45]当所有人抬头看星星的时候而我在看你\n' +
+    '[02:30.78]是爱情(我和你昼夜更替)\n' +
+    '[02:35.70]我眼里只有你虽然小声的说但却听的清晰\n' +
+    '[02:43.62]什么时候我突然如此上瘾可能注定\n' +
+    '[02:50.07]就是你';
+
+  function fmt(t) {
+    if (!isFinite(t) || t < 0) t = 0;
+    t = Math.floor(t);
+    var m = Math.floor(t / 60);
+    var s = t % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function parseLRC(text) {
+    var out = [];
+    var re = /\[(\d{1,2}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g;
+    var lines = String(text).split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      var raw = lines[i];
+      var m, tags = [];
+      re.lastIndex = 0;
+      while ((m = re.exec(raw)) !== null) {
+        var min = parseInt(m[1], 10);
+        var sec = parseInt(m[2], 10);
+        var frac = m[3] ? parseInt((m[3] + '00').slice(0, 3), 10) : 0;
+        tags.push(min * 60 + sec + frac / 1000);
+      }
+      var content = raw.replace(re, '').trim();
+      if (!tags.length || !content) continue;
+      for (var j = 0; j < tags.length; j++) {
+        out.push({ t: tags[j], text: content });
+      }
+    }
+    out.sort(function (a, b) { return a.t - b.t; });
+    return out;
+  }
+
+  // 根据文本长度与容器宽度计算单行不换行、不溢出的字号
+  function appWidth() {
+    var app = document.querySelector('.app');
+    return app ? app.clientWidth : window.innerWidth;
+  }
+  function lineFontSize(text, active) {
+    var root = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    var max = active ? root * 1.28 : root;
+    var avail = appWidth() - 48;
+    if (avail < 120) avail = 120;
+    var len = text ? text.length : 1;
+    var need = avail / (len * 1.05);
+    var px = Math.min(max, need);
+    var minPx = active ? 11 : 9;
+    if (px < minPx) px = minPx;
+    return Math.round(px * 10) / 10;
+  }
+
+  function renderLyrics() {
+    lyricsScroll.innerHTML = '';
+    for (var i = 0; i < lyrics.length; i++) {
+      (function (idx) {
+        var div = document.createElement('div');
+        div.className = 'line';
+        div.textContent = lyrics[idx].text;
+        div.style.fontSize = lineFontSize(lyrics[idx].text, false) + 'px';
+        div.addEventListener('click', function () {
+          if (canSeek()) {
+            audio.currentTime = lyrics[idx].t;
+            if (audio.paused && started) {
+              var p = audio.play();
+              if (p && p.catch) p.catch(function () {});
+            }
+          } else {
+            showToast('正在优化播放，请稍候再试');
+          }
+        });
+        lyricsScroll.appendChild(div);
+      })(i);
+    }
+  }
+
+  function currentLineIndex(t) {
+    var idx = -1;
+    for (var i = 0; i < lyrics.length; i++) {
+      if (lyrics[i].t <= t) idx = i; else break;
+    }
+    return idx;
+  }
+
+  function updateLyrics(t) {
+    var idx = currentLineIndex(t);
+    if (idx === currentIndex) return;
+    currentIndex = idx;
+    previewLine.textContent = idx >= 0 ? lyrics[idx].text : '';
+
+    var lines = lyricsScroll.children;
+    for (var i = 0; i < lines.length; i++) {
+      var isActive = (i === idx);
+      lines[i].classList.toggle('active', isActive);
+      lines[i].style.fontSize = lineFontSize(lyrics[i].text, isActive) + 'px';
+    }
+    if (idx >= 0 && viewLyrics.classList.contains('open')) {
+      var active = lines[idx];
+      var target = active.offsetTop - lyricsScroll.clientHeight / 2 + active.clientHeight / 2;
+      lyricsScroll.scrollTo({ top: target, behavior: 'smooth' });
+    }
+  }
+
+  function setPlaying(playing) {
+    playBtn.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
+    playBtn2.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
+  }
+
+  function updateProgress() {
+    var d = audio.duration;
+    var t = audio.currentTime;
+    var pct = (isFinite(d) && d > 0) ? (t / d * 100) : 0;
+    if (!isFinite(pct)) pct = 0;
+    if (pct < 0) pct = 0;
+    if (pct > 100) pct = 100;
+    document.getElementById('fill').style.width = pct + '%';
+    document.getElementById('fill2').style.width = pct + '%';
+    document.getElementById('knob').style.left = pct + '%';
+    document.getElementById('knob2').style.left = pct + '%';
+    document.getElementById('curTime').textContent = fmt(t);
+    document.getElementById('curTime2').textContent = fmt(t);
+    if (isFinite(d) && d > 0) {
+      document.getElementById('totalTime').textContent = fmt(d);
+      document.getElementById('totalTime2').textContent = fmt(d);
+    }
+    updateLyrics(t);
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () { toast.classList.remove('show'); }, 2600);
+  }
+
+  function togglePlay() {
+    if (audio.ended) { audio.currentTime = 0; }
+    if (audio.paused) {
+      var p = audio.play();
+      if (p && p.catch) p.catch(function () { setPlaying(false); });
+    } else {
+      audio.pause();
+    }
+  }
+
+  // 计算音频可 seek 的总时长（秒）
+  function seekableTotal() {
+    try {
+      if (!audio.seekable || audio.seekable.length === 0) return 0;
+      var total = 0;
+      for (var i = 0; i < audio.seekable.length; i++) {
+        total += audio.seekable.end(i) - audio.seekable.start(i);
+      }
+      return total;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  // 判断音频是否支持 seek
+  function canSeek() {
+    return seekableTotal() > 1;
+  }
+
+  // 无 Range 支持的服务器下音频的 seekable 可能为空、无法拖动进度。
+  // 此时通过 fetch 完整下载音频并转为 Blob URL，即可获得完整 seek 能力（兼容绝大多数环境）。
+  var blobFallbackTried = false;
+  function enableBlobFallback() {
+    if (blobFallbackTried) return;
+    blobFallbackTried = true;
+    // file:// 本地文件浏览器可直接随机访问，无需回退
+    if (location.protocol === 'file:') return;
+    if (typeof window.fetch !== 'function') return;
+
+    var wasPlaying = !audio.paused && !audio.ended;
+    var pos = audio.currentTime || 0;
+
+    fetch('music.mp3')
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.blob();
+      })
+      .then(function (blob) {
+        var url = URL.createObjectURL(blob);
+        function restore() {
+          if (pos > 0.5) {
+            try { audio.currentTime = pos; } catch (e) {}
+          }
+          if (wasPlaying) {
+            var p = audio.play();
+            if (p && p.catch) p.catch(function () {});
+          }
+          audio.removeEventListener('loadedmetadata', restore);
+        }
+        audio.addEventListener('loadedmetadata', restore);
+        audio.src = url;
+        audio.load();
+      })
+      .catch(function () {
+        // fetch 失败（如 file:// 或跨域限制）时保持原样，进度条提示不可拖
+      });
+  }
+
+  // 可拖动进度条（对非法 duration / 非法坐标做防护，避免写入异常 currentTime）
+  function setupSeek(trackId, fillId, knobId, curId) {
+    var track = document.getElementById(trackId);
+    var fill = document.getElementById(fillId);
+    var knob = document.getElementById(knobId);
+    var cur = document.getElementById(curId);
+    var dragging = false;
+    var lastX = 0;
+
+    function ratio(e) {
+      var r = track.getBoundingClientRect();
+      if (!r || !isFinite(r.width) || r.width <= 0) return lastX;
+      var x = (e.clientX - r.left) / r.width;
+      if (!isFinite(x)) return lastX;
+      x = Math.max(0, Math.min(1, x));
+      lastX = x;
+      return x;
+    }
+    function paint(x) {
+      if (!isFinite(x)) x = lastX;
+      x = Math.max(0, Math.min(1, x));
+      lastX = x;
+      fill.style.width = (x * 100) + '%';
+      knob.style.left = (x * 100) + '%';
+      var d = audio.duration;
+      if (isFinite(d) && d > 0) {
+        cur.textContent = fmt(d * x);
+      }
+    }
+    function down(e) {
+      dragging = true;
+      try { track.setPointerCapture(e.pointerId); } catch (err) {}
+      paint(ratio(e));
+      if (e.cancelable) e.preventDefault();
+    }
+    function move(e) {
+      if (dragging) paint(ratio(e));
+    }
+    function up() {
+      if (!dragging) return;
+      dragging = false;
+      var d = audio.duration;
+      if (!isFinite(d) || d <= 0) return;
+      var target = d * lastX;
+      if (target < 0) target = 0;
+      if (target >= d) target = Math.max(0, d - 0.05);
+      if (canSeek()) {
+        try { audio.currentTime = target; } catch (err) {}
+      } else {
+        showToast('正在优化播放，请稍候再试');
+        updateProgress();
+      }
+    }
+    track.addEventListener('pointerdown', down);
+    track.addEventListener('pointermove', move);
+    track.addEventListener('pointerup', up);
+    track.addEventListener('pointercancel', function () { dragging = false; });
+  }
+
+  // ---------- 视图切换 ----------
+  function openLyrics() {
+    viewLyrics.classList.remove('closing');
+    viewLyrics.classList.add('open');
+    updateLyrics(audio.currentTime || 0);
+  }
+  function closeLyrics() {
+    if (viewLyrics.classList.contains('closing')) return;
+    viewLyrics.classList.add('closing');
+    viewLyrics.classList.remove('open');
+    setTimeout(function () { viewLyrics.classList.remove('closing'); }, 360);
+  }
+  function openWiki() {
+    viewWiki.classList.remove('closing');
+    viewWiki.classList.add('open');
+  }
+  function closeWiki() {
+    if (viewWiki.classList.contains('closing')) return;
+    viewWiki.classList.add('closing');
+    viewWiki.classList.remove('open');
+    setTimeout(function () { viewWiki.classList.remove('closing'); }, 320);
+  }
+
+  // ---------- 分享 ----------
+  function copyLink() {
+    var url = location.href;
+    function done() { showToast('已复制链接，可粘贴分享'); }
+    function fallback(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done).catch(function () { fallback(url); done(); });
+    } else {
+      fallback(url); done();
+    }
+  }
+  function systemShare() {
+    var data = { title: '日月同辉 (Love Legend) - 银河快递', text: '日月同辉 (Love Legend) - 银河快递', url: location.href };
+    if (navigator.share) {
+      navigator.share(data).catch(function () { copyLink(); });
+    } else {
+      copyLink();
+    }
+  }
+  function downloadSong() {
+    var a = document.createElement('a');
+    a.href = 'music.mp3';
+    a.download = '日月同辉 (Love Legend).mp3';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('开始下载歌曲');
+  }
+  function openSheet() {
+    sheetMask.classList.add('show');
+  }
+  function closeSheet() {
+    sheetMask.classList.remove('show');
+  }
+
+  // ---------- 事件绑定 ----------
+  playBtn.addEventListener('click', togglePlay);
+  playBtn2.addEventListener('click', togglePlay);
+  document.getElementById('lyricPreview').addEventListener('click', openLyrics);
+  document.getElementById('closeLyrics').addEventListener('click', closeLyrics);
+  document.getElementById('closeWiki').addEventListener('click', closeWiki);
+
+  var wikiBtns = document.querySelectorAll('.open-wiki');
+  for (var w = 0; w < wikiBtns.length; w++) {
+    wikiBtns[w].addEventListener('click', openWiki);
+  }
+  var shareBtns = document.querySelectorAll('.share-btn');
+  for (var s = 0; s < shareBtns.length; s++) {
+    shareBtns[s].addEventListener('click', openSheet);
+  }
+
+  setupSeek('track', 'fill', 'knob', 'curTime');
+  setupSeek('track2', 'fill2', 'knob2', 'curTime2');
+
+  // 窗口尺寸变化时重新计算歌词字号，保持单行不溢出
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      var lines = lyricsScroll.children;
+      for (var i = 0; i < lines.length; i++) {
+        var active = lines[i].classList.contains('active');
+        lines[i].style.fontSize = lineFontSize(lyrics[i].text, active) + 'px';
+      }
+    }, 150);
+  });
+
+  document.getElementById('shareSystem').addEventListener('click', function () { closeSheet(); systemShare(); });
+  document.getElementById('shareCopy').addEventListener('click', function () { closeSheet(); copyLink(); });
+  document.getElementById('shareDownload').addEventListener('click', function () { closeSheet(); downloadSong(); });
+  document.getElementById('sheetCancel').addEventListener('click', closeSheet);
+  sheetMask.addEventListener('click', function (e) {
+    if (e.target === sheetMask) closeSheet();
+  });
+
+  audio.addEventListener('timeupdate', updateProgress);
+  audio.addEventListener('loadedmetadata', function () {
+    updateProgress();
+    // 元数据就绪后检测 seek 能力，不可 seek 则自动走 Blob 回退
+    setTimeout(function () {
+      if (seekableTotal() <= 1) enableBlobFallback();
+    }, 400);
+  });
+  audio.addEventListener('play', function () { started = true; setPlaying(true); });
+  audio.addEventListener('pause', function () { setPlaying(false); });
+  audio.addEventListener('ended', function () {
+    audio.pause();
+    setPlaying(false);
+  });
+  audio.addEventListener('error', function () {
+    showToast('无法播放 music.mp3\n请确认文件与网页在同一文件夹');
+  });
+
+  // 自动播放 + 首次点击兜底
+  function attemptAutoplay() {
+    var p = audio.play();
+    if (p && p.catch) p.catch(function () { setPlaying(false); });
+  }
+  document.addEventListener('click', function () {
+    if (!started && audio.paused) {
+      audio.play().then(function () { started = true; }).catch(function () {});
+    }
+  });
+
+  function loadLyrics() {
+    function apply(text) {
+      lyrics = parseLRC(text);
+      renderLyrics();
+      updateLyrics(audio.currentTime || 0);
+    }
+    // file:// 协议下 fetch 无法读取本地文件，直接用内置歌词（内容与 lyrics.lrc 一致）
+    if (location.protocol === 'file:' || !window.fetch) {
+      apply(LRC_FALLBACK);
+      return;
+    }
+    fetch('lyrics.lrc')
+      .then(function (res) {
+        if (res.ok) return res.text();
+        throw new Error('no lrc');
+      })
+      .then(function (text) {
+        if (text && text.trim()) apply(text);
+        else apply(LRC_FALLBACK);
+      })
+      .catch(function () { apply(LRC_FALLBACK); });
+  }
+
+  // ---------- 初始化 ----------
+  setPlaying(false);
+  loadLyrics();
+  attemptAutoplay();
+})();
+</script>
+</body>
+</html>
